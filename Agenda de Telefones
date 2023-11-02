@@ -1,0 +1,202 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// Definição da estrutura do contato
+typedef struct Contato {
+    char nome[50];
+    char telefone[15];
+    struct Contato *prox;
+    struct Contato *ant;
+} Contato;
+
+// Criação da lista de contatos
+Contato *inicio = NULL;
+Contato *fim = NULL;
+
+// Função para inserir um novo contato na lista
+void inserirContato(char nome[], char telefone[]) {
+    Contato *novoContato = (Contato *)malloc(sizeof(Contato));
+    strcpy(novoContato->nome, nome);
+    strcpy(novoContato->telefone, telefone);
+    novoContato->prox = NULL;
+
+    if (inicio == NULL) {
+        novoContato->ant = NULL;
+        inicio = novoContato;
+        fim = novoContato;
+    } else {
+        novoContato->ant = fim;
+        fim->prox = novoContato;
+        fim = novoContato;
+    }
+
+    printf("Contato inserido com sucesso!\n");
+}
+
+// Função para exibir todos os contatos na lista
+void listarContatos() {
+    if (inicio == NULL) {
+        printf("Agenda vazia.\n");
+    } else {
+        Contato *atual = inicio;
+        while (atual != NULL) {
+            printf("Nome: %s\nTelefone: %s\n\n", atual->nome, atual->telefone);
+            atual = atual->prox;
+        }
+    }
+}
+
+// Função para consultar um contato pelo nome
+void consultarContato(char nome[]) {
+    Contato *atual = inicio;
+    int encontrado = 0;
+
+    while (atual != NULL) {
+        if (strcmp(atual->nome, nome) == 0) {
+            printf("Contato encontrado:\nNome: %s\nTelefone: %s\n", atual->nome, atual->telefone);
+            encontrado = 1;
+            break;
+        }
+        atual = atual->prox;
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+}
+
+// Função para excluir um contato pelo nome
+void excluirContato(char nome[]) {
+    Contato *atual = inicio;
+    Contato *temp = NULL;
+    int encontrado = 0;
+
+    while (atual != NULL) {
+        if (strcmp(atual->nome, nome) == 0) {
+            if (atual == inicio) {
+                inicio = atual->prox;
+                if (inicio != NULL) {
+                    inicio->ant = NULL;
+                }
+            } else if (atual == fim) {
+                fim = atual->ant;
+                fim->prox = NULL;
+            } else {
+                temp = atual->ant;
+                temp->prox = atual->prox;
+                temp = atual->prox;
+                temp->ant = atual->ant;
+            }
+
+            free(atual);
+            printf("Contato excluído com sucesso.\n");
+            encontrado = 1;
+            break;
+        }
+        atual = atual->prox;
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+}
+
+// Função para alterar o telefone de um contato pelo nome
+void alterarContato(char nome[], char novoTelefone[]) {
+    Contato *atual = inicio;
+    int encontrado = 0;
+
+    while (atual != NULL) {
+        if (strcmp(atual->nome, nome) == 0) {
+            strcpy(atual->telefone, novoTelefone);
+            printf("Telefone do contato %s alterado com sucesso.\n", nome);
+            encontrado = 1;
+            break;
+        }
+        atual = atual->prox;
+    }
+
+    if (!encontrado) {
+        printf("Contato não encontrado.\n");
+    }
+}
+
+// Função para limpar a memória alocada pela lista de contatos
+void liberarMemoria() {
+    Contato *atual = inicio;
+    Contato *temp;
+
+    while (atual != NULL) {
+        temp = atual;
+        atual = atual->prox;
+        free(temp);
+    }
+
+    inicio = NULL;
+    fim = NULL;
+}
+
+int main() {
+    int opcao;
+    char nome[50];
+    char telefone[15];
+    char novoTelefone[15];
+
+    do {
+        printf("\n### MENU ###\n");
+        printf("1. Inserir contato\n");
+        printf("2. Consultar contato\n");
+        printf("3. Excluir contato\n");
+        printf("4. Alterar contato\n");
+        printf("5. Listar todos os contatos\n");
+        printf("6. Sair\n");
+        printf("Escolha uma opção: ");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                printf("Digite o nome do contato: ");
+                scanf(" %[^\n]", nome);
+                printf("Digite o telefone do contato: ");
+                scanf(" %[^\n]", telefone);
+                inserirContato(nome, telefone);
+                break;
+
+            case 2:
+                printf("Digite o nome do contato a ser consultado: ");
+                scanf(" %[^\n]", nome);
+                consultarContato(nome);
+                break;
+
+            case 3:
+                printf("Digite o nome do contato a ser excluído: ");
+                scanf(" %[^\n]", nome);
+                excluirContato(nome);
+                break;
+
+            case 4:
+                printf("Digite o nome do contato a ser alterado: ");
+                scanf(" %[^\n]", nome);
+                printf("Digite o novo telefone: ");
+                scanf(" %[^\n]", novoTelefone);
+                alterarContato(nome, novoTelefone);
+                break;
+
+            case 5:
+                listarContatos();
+                break;
+
+            case 6:
+                liberarMemoria();
+                printf("Programa encerrado.\n");
+                break;
+
+            default:
+                printf("Opção inválida. Tente novamente.\n");
+        }
+
+    } while (opcao != 6);
+
+    return 0;
+}
